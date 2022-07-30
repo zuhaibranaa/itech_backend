@@ -13,7 +13,6 @@ class CustomerManager(BaseUserManager):
         """
         if not email:
             raise ValueError('Users must have an email address')
-
         user = self.model(
             email=self.normalize_email(email),
             name = name,
@@ -36,7 +35,7 @@ class CustomerManager(BaseUserManager):
         birth and password.
         """
         user = self.create_user(
-            email,
+            email=email,
             name = name,
             location = location,
             cnic = cnic,
@@ -74,7 +73,7 @@ class ManagerManager(BaseUserManager):
         birth and password.
         """
         user = self.create_user(
-            email,
+            email = email,
             name = name,
             location = location,
             cnic = cnic,
@@ -96,10 +95,7 @@ class Manager(AbstractBaseUser):
     name = models.CharField(max_length=200)
     location = models.CharField(max_length=255)
     cnic = models.CharField(max_length=20)
-    phone = models.TextField(max_length=500, validators=[phone_regex], unique=True)
-    # pppoe_name = models.CharField(max_length=200, unique=True, null=True) 
-    # pppoe_password = models.CharField(max_length=200,null=True)
-    # profile = models.ForeignKey(Profile,models.CASCADE,null=True)
+    phone = models.CharField(max_length=500, validators=[phone_regex], unique=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -128,6 +124,8 @@ class Manager(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+    
+    
 # Customer User
 class Customer(AbstractBaseUser):
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,14}$',
@@ -140,7 +138,7 @@ class Customer(AbstractBaseUser):
     name = models.CharField(max_length=200)
     location = models.CharField(max_length=255)
     cnic = models.CharField(max_length=20)
-    phone = models.TextField(max_length=500, validators=[phone_regex], unique=True)
+    phone = models.CharField(max_length=500, validators=[phone_regex], unique=True)
     pppoe_name = models.CharField(max_length=200, unique=True, null=True) 
     pppoe_password = models.CharField(max_length=200,null=True)
     profile = models.ForeignKey(Profile,models.CASCADE,null=True)
