@@ -1,12 +1,12 @@
 from django.db import models
-from RouterOS.models import Profile
+from RouterOS.models import PPPOE, Profile
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import (BaseUserManager,AbstractBaseUser)
 # Create your models here.
 
 # Custom User Manager
 class CustomerManager(BaseUserManager):
-    def create_user(self, name, location, cnic, phone, pppoe_name, pppoe_password, profile, manager, email, password=None):
+    def create_user(self, name, location, cnic, phone, email, image, pppoe=None, profile=None, manager=None, password=None,password2=None):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -16,11 +16,11 @@ class CustomerManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email),
             name = name,
+            image = image,
             location = location,
             cnic = cnic,
             phone = phone,
-            pppoe_name = pppoe_name,
-            pppoe_password = pppoe_password,
+            pppoe = pppoe,
             profile = profile,
             manager = manager,
         )
@@ -29,25 +29,8 @@ class CustomerManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, name, location, cnic, phone, email, password=None):
-        """
-        Creates and saves a superuser with the given email, date of
-        birth and password.
-        """
-        user = self.create_user(
-            email=email,
-            name = name,
-            location = location,
-            cnic = cnic,
-            phone = phone,
-            password=password,
-        )
-        user.is_admin = False
-        user.save(using=self._db)
-        return user
-
 class ManagerManager(BaseUserManager):
-    def create_user(self, name, location, cnic, phone, email, password=None):
+    def create_user(self, name, location, cnic, phone, email, image, password=None):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -58,6 +41,7 @@ class ManagerManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email),
             name = name,
+            image = image,
             location = location,
             cnic = cnic,
             phone = phone,
@@ -93,10 +77,11 @@ class Manager(AbstractBaseUser):
         unique=True,
     )
     name = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='my_picture',blank=True)
     location = models.CharField(max_length=255)
     cnic = models.CharField(max_length=20)
     phone = models.CharField(max_length=500, validators=[phone_regex], unique=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -136,14 +121,14 @@ class Customer(AbstractBaseUser):
         unique=True,
     )
     name = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='my_picture',blank=True)
     location = models.CharField(max_length=255)
     cnic = models.CharField(max_length=20)
     phone = models.CharField(max_length=500, validators=[phone_regex], unique=True)
-    pppoe_name = models.CharField(max_length=200, unique=True, null=True) 
-    pppoe_password = models.CharField(max_length=200,null=True)
+    pppoe = models.ForeignKey(PPPOE,models.CASCADE,null=True)
     profile = models.ForeignKey(Profile,models.CASCADE,null=True)
     manager = models.ForeignKey(Manager,on_delete=models.SET_NULL,null=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

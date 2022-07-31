@@ -4,3 +4,4 @@ from .models import *
 admin.site.register(NAS)
 admin.site.register(Profile)
 admin.site.register(ProfileGroup)
+admin.site.register(PPPOE)

@@ -15,7 +15,13 @@ class ProfileGroup(models.Model):
 class Profile(models.Model):
     name = models.CharField(max_length=100)
     nas = models.ForeignKey(NAS,models.CASCADE)
-    model = models.ForeignKey(ProfileGroup,models.CASCADE)
+    group = models.ForeignKey(ProfileGroup,models.CASCADE)
     
     def __str__(self) -> str:
         return self.name
+
+class PPPOE(models.Model):
+    name = models.CharField(max_length=200)
+    password = models.CharField(max_length=200)
+    nas = models.ForeignKey(NAS,models.CASCADE)
+    profile = models.ForeignKey(Profile,models.CASCADE)
