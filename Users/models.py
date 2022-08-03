@@ -144,7 +144,7 @@ class Customer(AbstractBaseUser):
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
         # Simplest possible answer: Yes, always
-        return self.is_admin
+        return True
 
     def has_module_perms(self, app_label):
         "Does the user have permissions to view the app `app_label`?"
@@ -156,6 +156,22 @@ class Customer(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+class Messages(models.Model):
+    title = models.CharField(max_length=100)
+    text = models.TextField()
+    from_user = models.ForeignKey(Manager,models.CASCADE)
+    to_user = models.ForeignKey(Customer,models.CASCADE)
     
+    def __str__(self):
+        return self.title
     
+class Complains(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    user = models.ForeignKey(Customer,models.CASCADE)
+    manager = models.ForeignKey(Manager,models.CASCADE)
+    
+    def __str__(self):
+        return self.title
     

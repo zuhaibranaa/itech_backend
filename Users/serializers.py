@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Users.models import Customer,Manager
+from Users.models import Complains, Customer,Manager, Messages
 
 class CustomerRegistrationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type':'password'},write_only=True)
@@ -56,3 +56,13 @@ class ManagerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Manager
         exclude = ['password','last_login']
+
+class MessagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Messages
+        fields = '__all__'
+        
+class ComplainsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Complains
+        fields = '__all__'

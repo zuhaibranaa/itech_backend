@@ -19,8 +19,9 @@ class CustomerRegister(APIView):
         serializer = CustomerRegistrationSerializer(data=request.data)
         if serializer.is_valid(True):
             user = serializer.save()
+            serializer = CustomerProfileSerializer(user)
             token = get_tokens_for_user(user)
-            return Response({'message': 'Customer Created Successfully','token':token},status=status.HTTP_201_CREATED)
+            return Response({'user': serializer.data,'token':token},status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)  
 class ManagerRegister(APIView):
     def post(self,request,format=None):
@@ -28,7 +29,8 @@ class ManagerRegister(APIView):
         if serializer.is_valid(True):
             user = serializer.save()
             token = get_tokens_for_user(user)
-            return Response({'message': 'Manager Created Successfully','token':token},status=status.HTTP_201_CREATED)
+            serializer = ManagerProfileSerializer(user)
+            return Response({'user': serializer.data,'token':token},status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 class CustomerLogin(APIView):
     def post(self,request,format=None):
@@ -39,7 +41,8 @@ class CustomerLogin(APIView):
             user = authenticate(email=e_mail,password=password)
             if user is not None:
                 token = get_tokens_for_user(user)
-                return Response({'message':'Login Success','token':token},status.HTTP_202_ACCEPTED)
+                serializer = CustomerProfileSerializer(user)
+                return Response({'user':serializer.data,'token':token},status.HTTP_202_ACCEPTED)
             else:
                 return Response({'error': 'No User Found Against Your Email Or Password Check Your Credentials'},status.HTTP_404_NOT_FOUND)
 class ManagerLogin(APIView):
@@ -51,16 +54,8 @@ class ManagerLogin(APIView):
             user = authenticate(email=e_mail,password=password)
             if user is not None:
                 token = get_tokens_for_user(user)
-                return Response({'message':'Login Success','token':token},status.HTTP_202_ACCEPTED)
+                serializer = ManagerProfileSerializer(user)
+                return Response({'user':serializer.data,'token':token},status.HTTP_202_ACCEPTED)
             else:
                 return Response({'error': 'No User Found Against Your Email Or Password Check Your Credentials'},status.HTTP_404_NOT_FOUND)
-class CustomerProfile(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self,request):
-        serializer = CustomerProfileSerializer(request.user)
-        return Response(serializer.data,status.HTTP_200_OK)
-class ManagerProfile(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self,request):
-        serializer = ManagerProfileSerializer(request.user)
-        return Response(serializer.data,status.HTTP_200_OK)
+            
