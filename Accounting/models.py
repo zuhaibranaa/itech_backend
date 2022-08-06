@@ -8,8 +8,8 @@ class Invoice(models.Model):
         (2, 'Pending'),
         (3, 'Overdue'),
     }
-    user_id = models.ForeignKey(Customer,models.CASCADE)
-    generated_by = models.ForeignKey(Manager,models.CASCADE)
+    user_id = models.ForeignKey(User,models.CASCADE,verbose_name='Customer',related_name='Customer')
+    generated_by = models.ForeignKey(User,models.CASCADE,verbose_name='Manager',related_name='Manager')
     billing_date = models.DateTimeField(default=None)
     due_date = models.DateTimeField(default=None)
     discount = models.IntegerField(default=None)
@@ -23,7 +23,7 @@ class Invoice(models.Model):
         return super().__str__()
     
 class Payments(models.Model):
-    paid_by = models.ForeignKey(Customer,models.CASCADE)
+    paid_by = models.ForeignKey(User,models.CASCADE)
     invoice = models.ForeignKey(Invoice,models.CASCADE)
     amount = models.IntegerField()
     method = models.CharField(max_length=255)

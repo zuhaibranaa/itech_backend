@@ -2,3 +2,4 @@
 */migrations/*
 */*/*.pyc
 media/my_picture/*.JPG
+*/__pycache__
