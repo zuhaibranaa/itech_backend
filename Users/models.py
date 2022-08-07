@@ -25,17 +25,17 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, name, location, cnic, phone,image, email, password=None):
+    def create_superuser(self, name, location, phone,email, password=None):
         """
         Creates and saves a superuser with the given email, date of
         birth and password.
         """
         user = self.create_user(
             email = email,
-            image = image,
+            # image = image,
             name = name,
             location = location,
-            cnic = cnic,
+            # cnic = cnic,
             phone = phone,
             password=password,
             roles_id=2,
@@ -58,12 +58,12 @@ class User(AbstractBaseUser):
         (2, 'Admin')
     )
     name = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='my_picture',blank=True)
+    image = models.ImageField(upload_to='my_picture',blank=True,default=None)
     location = models.CharField(max_length=255)
     cnic = models.CharField(max_length=20)
     phone = models.CharField(max_length=500, validators=[phone_regex], unique=True)
     pppoe = models.ForeignKey(PPPOE,models.CASCADE,null=True)
-    profile = models.ForeignKey(Profile,models.CASCADE,null=True)
+    profile = models.ForeignKey(Profile,models.CASCADE,null=True,default=None)
     manager = models.ForeignKey('self',on_delete=models.SET_NULL,null=True)
     roles_id = models.IntegerField(default=0,choices=USER_TYPE)
     is_active = models.BooleanField(default=False)
@@ -74,7 +74,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name','cnic','phone','location','profile']
+    REQUIRED_FIELDS = ['name','phone','location']
 
     def __str__(self):
         return self.email

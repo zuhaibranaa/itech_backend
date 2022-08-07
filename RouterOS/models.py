@@ -33,7 +33,6 @@ class Profile(models.Model):
     download_rate = models.IntegerField()
     upload_rate = models.IntegerField()
     nas = models.ForeignKey(NAS,models.CASCADE)
-    group = models.ForeignKey(ProfileGroup,models.CASCADE)
     description = models.TextField()
     
     def __str__(self) -> str:
