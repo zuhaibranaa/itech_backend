@@ -4,7 +4,7 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import (BaseUserManager,AbstractBaseUser)
 # Create your models here.
 class UserManager(BaseUserManager):
-    def create_user(self, name, location, cnic, phone, email, image,password=None):
+    def create_user(self, name, location, phone, email,roles_id, image=None,password=None,cnic=None):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -18,6 +18,7 @@ class UserManager(BaseUserManager):
             image = image,
             location = location,
             cnic = cnic,
+            roles_id = roles_id,
             phone = phone,
         )
 
@@ -25,7 +26,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, name, location, phone,email, password=None):
+    def create_superuser(self, name, location, phone,email,roles_id, password=None):
         """
         Creates and saves a superuser with the given email, date of
         birth and password.
@@ -38,7 +39,7 @@ class UserManager(BaseUserManager):
             # cnic = cnic,
             phone = phone,
             password=password,
-            roles_id=2,
+            roles_id=roles_id,
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -60,7 +61,7 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length=200)
     image = models.ImageField(upload_to='my_picture',blank=True,default=None)
     location = models.CharField(max_length=255)
-    cnic = models.CharField(max_length=20)
+    cnic = models.CharField(max_length=20,null=True)
     phone = models.CharField(max_length=500, validators=[phone_regex], unique=True)
     pppoe = models.ForeignKey(PPPOE,models.CASCADE,null=True)
     profile = models.ForeignKey(Profile,models.CASCADE,null=True,default=None)
@@ -74,7 +75,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name','phone','location']
+    REQUIRED_FIELDS = ['name','phone','location','roles_id']
 
     def __str__(self):
         return self.email
