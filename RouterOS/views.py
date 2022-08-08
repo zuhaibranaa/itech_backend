@@ -13,7 +13,6 @@ from rest_framework.permissions import *
 # Create your views here.
 
 class NAS_Crud(APIView):
-    permission_classes = [AllowAny]
     # creating new NAS
     def post(self,request):
         # nas = NAS()
@@ -23,7 +22,7 @@ class NAS_Crud(APIView):
             return Response({'data':'NAS Added Successfully'})
         else:
             return Response({'error':'NAS Registration Failed Check Your API Or Credentials'},status.HTTP_400_BAD_REQUEST)
-    # updating new NAS
+    # updating a NAS
     def put(self,request):
         pass
     # deleting a nas
@@ -50,7 +49,8 @@ class Profile(APIView):
         serializer = NasSerializer(obj,many=True)
         data = []
         for o in serializer.data:
-            data.append(requests.get(url='https://'+o.get('ip_address')+'/rest/ppp/profile',auth=HTTPBasicAuth(o.get('username'), o.get('password')),verify=False).json())
+            ip = o.get('ip_address')
+            data.append(requests.get(url=f'https://{ip}/rest/ppp/profile',auth=HTTPBasicAuth(o.get('username'), o.get('password')),verify=False).json())
         return Response(data,status=status.HTTP_200_OK)
 class ProfileGroupView(APIView):
     def get(self,request):

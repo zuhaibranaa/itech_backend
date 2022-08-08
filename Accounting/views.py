@@ -25,7 +25,9 @@ class InvoicesView(APIView):
         
     # update an invoice
     def put(self,request):
-        pass
+        data = Invoice.objects.get(id = request.data.payment)
+        serializer = InvoiceSerializer(data=data)
+        return Response(serializer.data,status.HTTP_200_OK)
     # create new invoice
     def post(self,request):
         invoice = InvoiceSerializer(data=request.data)
