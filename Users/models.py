@@ -42,6 +42,7 @@ class UserManager(BaseUserManager):
             roles_id=roles_id,
         )
         user.is_admin = True
+        user.is_active = True
         user.save(using=self._db)
         return user
 # Customer User
