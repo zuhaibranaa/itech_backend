@@ -8,4 +8,6 @@ admin.site.register(Invoice)
 admin.site.register(Payment)
 admin.site.register(InventoryItem)
 admin.site.register(Sale)
+admin.site.register(Journal)
+admin.site.register(Transaction)
 

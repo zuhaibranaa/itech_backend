@@ -2,10 +2,21 @@ from django.db import models
 from Users.models import *
 from django.core.validators import RegexValidator
 
+TRANSACTION_CHOICES = (
+    ('dr', 'DEBIT'),
+    ('cr', 'CREDIT')
+)
+ACTIVITIES = (
+    ('op', 'OPERATING'),
+    ('in', 'INVESTING'),
+    ('fi', 'FINANCING')
+)
+
 
 # Create your models here.
 class Journal(models.Model):
     date = models.DateTimeField(auto_now_add=True)
+    activity_type = models.CharField(max_length=12, choices=ACTIVITIES)
     description = models.TextField(max_length=1000)
 
 
@@ -13,17 +24,19 @@ class BillingAccount(models.Model):
     user = models.OneToOneField(User, models.CASCADE)
     current_balance = models.IntegerField(default=0)
 
+    def __str__(self):
+        return self.user
+
 
 class Transaction(models.Model):
-    TRANSACTION_CHOICES = (
-        ('debit', 'DEBIT'),
-        ('credit', 'CREDIT')
-    )
-    journal_entry_id = models.ForeignKey(Journal, models.CASCADE)
-    account_id = models.ForeignKey(BillingAccount, models.CASCADE)
-    tx_type = models.CharField(max_length=10,choices=TRANSACTION_CHOICES)
+    journal_entry = models.ForeignKey(Journal, models.CASCADE)
+    account = models.ForeignKey(BillingAccount, models.CASCADE)
+    tx_type = models.CharField(max_length=10, choices=TRANSACTION_CHOICES)
     amount = models.IntegerField()
     description = models.TextField(max_length=2000)
+
+    def __str__(self):
+        return self.account
 
 
 class Supplier(models.Model):
@@ -46,6 +59,7 @@ class Invoice(models.Model):
     billing_date = models.DateTimeField(default=None)
     due_date = models.DateTimeField(default=None)
     discount = models.IntegerField(default=None)
+    description = models.TextField(max_length=500)
     other_dues = models.IntegerField()
     total_amount = models.IntegerField()
     invoice_status = models.IntegerField(choices=status)

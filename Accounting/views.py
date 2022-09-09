@@ -47,6 +47,56 @@ class InvoicesView(APIView):
             return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
 
 
+class JournalView(APIView):
+    # get all invoices
+    def get(self, request):
+        data = Journal.objects.all()
+        serializer = JournalSerializer(data=data, many=True)
+        serializer.is_valid()
+        try:
+            return Response(serializer.data, status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': 'Data Has Errors'})
+
+    # get single invoice
+    def patch(self, request):
+        data = Journal.objects.get(id=request.data.id)
+        serializer = JournalSerializer(data=data)
+        if serializer.is_valid(True):
+            return Response(serializer.data, status.HTTP_200_OK)
+
+    # update an invoice
+    def put(self, request):
+        data = Journal.objects.get(id=request.data.payment)
+        serializer = JournalSerializer(data=data)
+        return Response(serializer.data, status.HTTP_200_OK)
+
+    # create new invoice
+    def post(self, request):
+        journal = JournalSerializer(data=request.data.get('description'))
+        if journal.is_valid():
+            print(' Journal Saved')
+            journal.save()
+        j_rec = Journal.objects.get(description=request.data.get('description'))
+        transactions_data = request.data.get('transactions')
+        for obj in transactions_data:
+            obj['journal_entry_id'] = j_rec.id
+        print(transactions_data)
+        # transactions = TransactionSerializer(data=request.data.get('transactions'), many=True)
+        # transactions.is_valid()
+        # print(transactions.data)
+        #     return Response(journal.data, status.HTTP_201_CREATED)
+
+    # delete an invoice
+    def delete(self, request):
+        data = Journal.objects.get(id=request.data.get('id'))
+        try:
+            data.delete()
+            return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
+        except:
+            return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
+
+
 class SuppliersView(APIView):
     # get all invoices
     def get(self, request):
