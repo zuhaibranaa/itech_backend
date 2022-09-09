@@ -9,7 +9,7 @@ from .serializers import *
 class InvoicesView(APIView):
     # get all invoices
     def get(self, request):
-        data = Invoices.objects.all()
+        data = Invoice.objects.all()
         serializer = InvoiceSerializer(data=data, many=True)
         serializer.is_valid()
         try:
@@ -19,14 +19,14 @@ class InvoicesView(APIView):
 
     # get single invoice
     def patch(self, request):
-        data = Invoices.objects.get(id=request.data.id)
+        data = Invoice.objects.get(id=request.data.id)
         serializer = InvoiceSerializer(data=data)
         if serializer.is_valid(True):
             return Response(serializer.data, status.HTTP_200_OK)
 
     # update an invoice
     def put(self, request):
-        data = Invoices.objects.get(id=request.data.payment)
+        data = Invoice.objects.get(id=request.data.payment)
         serializer = InvoiceSerializer(data=data)
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -39,7 +39,7 @@ class InvoicesView(APIView):
 
     # delete an invoice
     def delete(self, request):
-        data = Invoices.objects.get(id=request.data.get('id'))
+        data = Invoice.objects.get(id=request.data.get('id'))
         try:
             data.delete()
             return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
@@ -50,7 +50,7 @@ class InvoicesView(APIView):
 class SuppliersView(APIView):
     # get all invoices
     def get(self, request):
-        data = Suppliers.objects.all()
+        data = Supplier.objects.all()
         serializer = SupplierSerializer(data=data, many=True)
         serializer.is_valid()
         try:
@@ -60,14 +60,14 @@ class SuppliersView(APIView):
 
     # get single invoice
     def patch(self, request):
-        data = Suppliers.objects.get(id=request.data.id)
+        data = Supplier.objects.get(id=request.data.id)
         serializer = SupplierSerializer(data=data)
         if serializer.is_valid(True):
             return Response(serializer.data, status.HTTP_200_OK)
 
     # update an invoice
     def put(self, request):
-        data = Suppliers.objects.get(id=request.data.payment)
+        data = Supplier.objects.get(id=request.data.payment)
         serializer = SupplierSerializer(data=data)
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -80,7 +80,7 @@ class SuppliersView(APIView):
 
     # delete an invoice
     def delete(self, request):
-        data = Suppliers.objects.get(id=request.data.get('id'))
+        data = Supplier.objects.get(id=request.data.get('id'))
         try:
             data.delete()
             return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
@@ -91,7 +91,7 @@ class SuppliersView(APIView):
 class InventoryView(APIView):
     # get all items
     def get(self, request):
-        data = InventoryItems.objects.all()
+        data = InventoryItem.objects.all()
         serializer = InventorySerializer(data=data, many=True)
         serializer.is_valid()
         try:
@@ -101,14 +101,14 @@ class InventoryView(APIView):
 
     # get single item
     def patch(self, request):
-        data = InventoryItems.objects.get(id=request.data.id)
+        data = InventoryItem.objects.get(id=request.data.id)
         serializer = InventorySerializer(data=data)
         if serializer.is_valid(True):
             return Response(serializer.data, status.HTTP_200_OK)
 
     # update an inventory item
     def put(self, request):
-        data = InventoryItems.objects.get(id=request.data.payment)
+        data = InventoryItem.objects.get(id=request.data.payment)
         serializer = InventorySerializer(data=data)
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -121,7 +121,7 @@ class InventoryView(APIView):
 
     # delete an Inventory
     def delete(self, request):
-        data = InventoryItems.objects.get(id=request.data.get('id'))
+        data = InventoryItem.objects.get(id=request.data.get('id'))
         try:
             data.delete()
             return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
@@ -132,7 +132,7 @@ class InventoryView(APIView):
 class SalesView(APIView):
     # get all invoices
     def get(self, request):
-        data = Sales.objects.all()
+        data = Sale.objects.all()
         serializer = SalesSerializer(data=data, many=True)
         serializer.is_valid()
         try:
@@ -142,14 +142,14 @@ class SalesView(APIView):
 
     # get single invoice
     def patch(self, request):
-        data = Sales.objects.get(id=request.data.id)
+        data = Sale.objects.get(id=request.data.id)
         serializer = SalesSerializer(data=data)
         if serializer.is_valid(True):
             return Response(serializer.data, status.HTTP_200_OK)
 
     # update an invoice
     def put(self, request):
-        data = Sales.objects.get(id=request.data.payment)
+        data = Sale.objects.get(id=request.data.payment)
         serializer = SalesSerializer(data=data)
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -162,7 +162,7 @@ class SalesView(APIView):
 
     # delete an invoice
     def delete(self, request):
-        data = Sales.objects.get(id=request.data.get('id'))
+        data = Sale.objects.get(id=request.data.get('id'))
         try:
             data.delete()
             return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
@@ -173,26 +173,26 @@ class SalesView(APIView):
 class PaymentsView(APIView):
     #  get all payments
     def get(self, req):
-        data = Payments.objects.all()
+        data = Payment.objects.all()
         serializer = PaymentSerializer(data=data, many=True)
         if serializer.is_valid(True):
             return Response(serializer.data, status.HTTP_200_OK)
 
     # get single payment
     def patch(self, request):
-        data = Payments.objects.get(id=request.payment)
+        data = Payment.objects.get(id=request.payment)
         serializer = PaymentSerializer(data=data)
         return Response(serializer.data, status.HTTP_200_OK)
 
     # update a payment
     def put(self, request):
-        data = Payments.objects.get(id=request.payment)
+        data = Payment.objects.get(id=request.payment)
         serializer = PaymentSerializer(data=data)
         return Response(serializer.data, status.HTTP_200_OK)
 
     # create new payment
     def post(self, request):
-        payment = Payments.objects.create(request)
+        payment = Payment.objects.create(request)
         serializer = PaymentSerializer(payment)
         if serializer.is_valid():
             payment.save()
@@ -201,6 +201,6 @@ class PaymentsView(APIView):
     # delete a payment
     def delete(self, request):
         print(request)
-        data = Payments.objects.filter(request.data.id)
+        data = Payment.objects.filter(request.data.id)
         data.delete()
         return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)

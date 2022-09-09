@@ -8,7 +8,7 @@ from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, Permi
 
 # Create your models here.
 class UserManager(BaseUserManager):
-    def create_user(self, name, location, phone, email, is_active, image=None, password=None, cnic=None):
+    def create_user(self, name, location, phone, email, is_active, is_superuser, groups, user_permissions,  image=None, password=None, cnic=None):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -22,7 +22,6 @@ class UserManager(BaseUserManager):
             image=image,
             location=location,
             cnic=cnic,
-            # roles_id=roles_id,
             phone=phone,
             is_active=is_active
         )
@@ -69,9 +68,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     pppoe = models.ForeignKey(PPPOE, models.CASCADE, null=True)
     profile = models.ForeignKey(Profile, models.CASCADE, null=True, default=None)
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
-    # account = models.OneToOneField(BillingAccounts, on_delete=models.SET_NULL, null=True)
-    # is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

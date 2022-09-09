@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'Accounting',
     'RouterOS',
     'Users',
-    # 'django_ledger'
+    'django_ledger'
 ]
 
 MIDDLEWARE = [

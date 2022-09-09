@@ -4,7 +4,29 @@ from django.core.validators import RegexValidator
 
 
 # Create your models here.
-class Suppliers(models.Model):
+class Journal(models.Model):
+    date = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(max_length=1000)
+
+
+class BillingAccount(models.Model):
+    user = models.OneToOneField(User, models.CASCADE)
+    current_balance = models.IntegerField(default=0)
+
+
+class Transaction(models.Model):
+    TRANSACTION_CHOICES = (
+        ('debit', 'DEBIT'),
+        ('credit', 'CREDIT')
+    )
+    journal_entry_id = models.ForeignKey(Journal, models.CASCADE)
+    account_id = models.ForeignKey(BillingAccount, models.CASCADE)
+    tx_type = models.CharField(max_length=10,choices=TRANSACTION_CHOICES)
+    amount = models.IntegerField()
+    description = models.TextField(max_length=2000)
+
+
+class Supplier(models.Model):
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,20}$',
                                  message="Phone number must be entered in the format: '+999999999'")
     name = models.CharField(max_length=255)
@@ -13,12 +35,7 @@ class Suppliers(models.Model):
     mobile = models.IntegerField(validators=[phone_regex])
 
 
-class BillingAccounts(models.Model):
-    user = models.OneToOneField(User, models.CASCADE)
-    current_balance = models.IntegerField(default=0)
-
-
-class Invoices(models.Model):
+class Invoice(models.Model):
     status = {
         (1, 'Paid'),
         (2, 'Pending'),
@@ -39,9 +56,9 @@ class Invoices(models.Model):
         return super().__str__()
 
 
-class Payments(models.Model):
+class Payment(models.Model):
     paid_by = models.ForeignKey(User, models.CASCADE)
-    invoice = models.OneToOneField(Invoices, models.CASCADE)
+    invoice = models.OneToOneField(Invoice, models.CASCADE)
     amount = models.IntegerField()
     method = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
@@ -52,7 +69,7 @@ class Payments(models.Model):
         return super().__str__()
 
 
-class InventoryItems(models.Model):
+class InventoryItem(models.Model):
     item_name = models.CharField(max_length=255)
     purchase_price = models.IntegerField()
     sku = models.IntegerField()
@@ -63,11 +80,11 @@ class InventoryItems(models.Model):
         return self.item_name
 
 
-class Sales(models.Model):
-    item_id = models.ForeignKey(InventoryItems, models.CASCADE)
+class Sale(models.Model):
+    item_id = models.ForeignKey(InventoryItem, models.CASCADE)
     quantity = models.IntegerField(default=1)
     sale_price = models.IntegerField()
-    payment_id = models.ForeignKey(Invoices, on_delete=models.CASCADE)
+    payment_id = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     description = models.TextField(max_length=1000)
     customer_id = models.ForeignKey(User, models.CASCADE, verbose_name='Customer', related_name='C')
 
