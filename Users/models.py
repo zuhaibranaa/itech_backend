@@ -22,7 +22,7 @@ class UserManager(BaseUserManager):
             image=image,
             location=location,
             cnic=cnic,
-            roles_id=0,
+            # roles_id=roles_id,
             phone=phone,
             is_active=is_active
         )
@@ -70,7 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, null=True, default=None)
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
     # account = models.OneToOneField(BillingAccounts, on_delete=models.SET_NULL, null=True)
-    is_superuser = models.BooleanField(default=False)
+    # is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
