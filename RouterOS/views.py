@@ -14,7 +14,7 @@ from rest_framework.permissions import *
 
 class NAS_Crud(APIView):
     # creating new NAS
-    def post(self,request):
+    def post(self, request):
         # nas = NAS()
         # print(request.data)
         api_data = requests.get(url='https://192.168.88.1/rest/ppp/profile',auth=HTTPBasicAuth('admin', 'password'),verify=False)

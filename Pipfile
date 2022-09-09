@@ -15,6 +15,10 @@ sqlparse = "==0.4.2"
 pillow = "*"
 python-dateutil = "*"
 requests = "*"
+cookiecutter = "*"
+autopep8 = "*"
+django-ledger = {git = "https://github.com/arrobalytics/django-ledger.git"}
+pyrad = "*"
 
 [dev-packages]
 

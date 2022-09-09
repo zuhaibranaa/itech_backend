@@ -6,7 +6,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         # fields = '__all__'
-        exclude = ['is_admin','is_active']
+        exclude = ['is_admin','roles_id']
         extra_kwargs = {
             'password': {'write_only':True}
         }

@@ -30,9 +30,9 @@ ALLOWED_HOSTS = [
     '*'
 ]
 CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ORIGIN_WHITELIST = (
-#   'http://localhost:3000',
-# )
+CORS_ORIGIN_WHITELIST = (
+  'http://localhost:5173',
+)
 CSRF_COOKIE_NAME = 'XSRF-TOKEN'
 CSRF_HEADER_NAME = 'HTTP_X_XSRF_TOKEN'
 
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'Accounting',
     'RouterOS',
     'Users',
+    'django_ledger'
 ]
 
 MIDDLEWARE = [
@@ -147,8 +148,7 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': False,
