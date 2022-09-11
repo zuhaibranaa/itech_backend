@@ -71,7 +71,6 @@ class SuppliersView(APIView):
             return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
 
 
-# pending Invoice Update Method
 class InvoicesView(APIView):
     # get all invoices
     def get(self, request):
@@ -86,7 +85,6 @@ class InvoicesView(APIView):
     # get single invoice
     def patch(self, request):
         data = Invoice.objects.get(id=request.data.get('id'))
-        print(MEDIA_URL + str(data.customer.image.name))
         return Response({
             'id': data.id,
             'billing_date': data.billing_date,
@@ -121,12 +119,6 @@ class InvoicesView(APIView):
             'status': data.invoice_status,
         }, status.HTTP_200_OK)
 
-    # update an invoice
-    def put(self, request):
-        data = Invoice.objects.get(id=request.data.get("invoice"))
-        serializer = InvoiceSerializer(data=data)
-        return Response(serializer.data, status.HTTP_200_OK)
-
     # create new invoice
     def post(self, request):
         invoice = InvoiceSerializer(data=request.data)
@@ -144,13 +136,18 @@ class InvoicesView(APIView):
             return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
 
 
+# Pending For Now
 class JournalView(APIView):
     # get all invoices
     def get(self, request):
         data = Journal.objects.all()
         serializer = JournalSerializer(data=data, many=True)
         serializer.is_valid()
+        response = []
         try:
+            for i in serializer.data:
+                transactions = Transaction.objects.get(journal_entry_id=i['id'])
+                print(transactions)
             return Response(serializer.data, status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': 'Data Has Errors'})
@@ -202,21 +199,50 @@ class InventoryView(APIView):
         serializer.is_valid()
         try:
             return Response(serializer.data, status.HTTP_200_OK)
-        except:
+        except Exception as e:
             return Response({'error': 'Data Has Errors'})
 
     # get single item
     def patch(self, request):
-        data = InventoryItem.objects.get(id=request.data.id)
-        serializer = InventorySerializer(data=data)
-        if serializer.is_valid(True):
-            return Response(serializer.data, status.HTTP_200_OK)
+        try:
+            data = InventoryItem.objects.get(id=request.data.get('id'))
+            return Response({
+                'id': data.id,
+                'name': data.item_name,
+                'price': data.purchase_price,
+                'quantity': data.sku,
+                'description': data.description,
+                'buying_date': data.buying_date,
+            }, status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message': "No Data Found"})
 
-    # update an inventory item
+    # Decrement or Increment in inventory items
     def put(self, request):
-        data = InventoryItem.objects.get(id=request.data.payment)
-        serializer = InventorySerializer(data=data)
-        return Response(serializer.data, status.HTTP_200_OK)
+        try:
+            data = InventoryItem.objects.get(id=request.data.get('id'))
+            amount = 0
+            if request.data.get('amount'):
+                amount = int(request.data.get('amount'))
+            if amount < 0:
+                if data.sku >= amount:
+                    data.sku -= amount
+                    data.save()
+            elif amount > 0:
+                data.sku += amount
+                data.save()
+            else:
+                data.delete()
+            return Response({
+                'id': data.id,
+                'name': data.item_name,
+                'price': data.purchase_price,
+                'quantity': data.sku,
+                'description': data.description,
+                'buying_date': data.buying_date,
+            }, status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
 
     # create new inventory item
     def post(self, request):
@@ -227,11 +253,11 @@ class InventoryView(APIView):
 
     # delete an Inventory
     def delete(self, request):
-        data = InventoryItem.objects.get(id=request.data.get('id'))
         try:
+            data = InventoryItem.objects.get(id=request.data.get('id'))
             data.delete()
-            return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
-        except:
+            return Response({"message": "Record Deleted Successfully"}, status.HTTP_204_NO_CONTENT)
+        except Exception as e:
             return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
 
 
@@ -243,7 +269,7 @@ class SalesView(APIView):
         serializer.is_valid()
         try:
             return Response(serializer.data, status.HTTP_200_OK)
-        except:
+        except Exception as e:
             return Response({'error': 'Data Has Errors'})
 
     # get single invoice
@@ -281,32 +307,80 @@ class PaymentsView(APIView):
     def get(self, req):
         data = Payment.objects.all()
         serializer = PaymentSerializer(data=data, many=True)
-        if serializer.is_valid(True):
-            return Response(serializer.data, status.HTTP_200_OK)
+        serializer.is_valid()
+        return Response(serializer.data, status.HTTP_200_OK)
 
     # get single payment
     def patch(self, request):
-        data = Payment.objects.get(id=request.payment)
-        serializer = PaymentSerializer(data=data)
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    # update a payment
-    def put(self, request):
-        data = Payment.objects.get(id=request.payment)
-        serializer = PaymentSerializer(data=data)
-        return Response(serializer.data, status.HTTP_200_OK)
+        data = Payment.objects.get(id=request.data.get('id'))
+        return Response({
+            'id': data.id,
+            'amount': data.amount,
+            'method': data.method,
+            'description': data.description,
+            'created_at': data.created_at,
+            'updated_at': data.updated_at,
+            'invoice': {
+                'id': data.invoice.id,
+                'billing_date': data.invoice.billing_date,
+                'due_date': data.invoice.due_date,
+                'discount': data.invoice.discount,
+                'other_dues': data.invoice.other_dues,
+                'total_amount': data.invoice.total_amount,
+                'created_at': data.invoice.created_at,
+                'updated_at': data.invoice.updated_at,
+            },
+            'paid_by': {
+                "id": data.paid_by.id,
+                "name": data.paid_by.name,
+                "email": data.paid_by.email,
+                "image": MEDIA_URL + str(data.paid_by.image.name),
+                "location": data.paid_by.location,
+                "cnic": data.paid_by.cnic,
+                "phone": data.paid_by.phone,
+                "status": check_status(data.paid_by.is_active),
+                "pppoe": data.paid_by.pppoe.name,
+                "profile": data.paid_by.profile.name,
+            },
+        }, status.HTTP_200_OK)
 
     # create new payment
     def post(self, request):
-        payment = Payment.objects.create(request)
-        serializer = PaymentSerializer(payment)
-        if serializer.is_valid():
-            payment.save()
-            return Response(serializer.data, status.HTTP_201_CREATED)
-
-    # delete a payment
-    def delete(self, request):
-        print(request)
-        data = Payment.objects.filter(request.data.id)
-        data.delete()
-        return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
+        payment = Payment.objects.create(
+            amount=request.data.get('amount'),
+            method=request.data.get('method'),
+            description=request.data.get('description'),
+            invoice_id=request.data.get('invoice'),
+            paid_by_id=request.data.get('paid_by'),
+        )
+        payment.invoice.invoice_status = 'paid'
+        payment.invoice.save()
+        payment.save()
+        return Response({
+            "id": payment.id,
+            "amount": payment.amount,
+            "method": payment.method,
+            "description": payment.description,
+            'invoice': {
+                'id': payment.invoice.id,
+                'billing_date': payment.invoice.billing_date,
+                'due_date': payment.invoice.due_date,
+                'discount': payment.invoice.discount,
+                'other_dues': payment.invoice.other_dues,
+                'total_amount': payment.invoice.total_amount,
+                'created_at': payment.invoice.created_at,
+                'updated_at': payment.invoice.updated_at,
+            },
+            'paid_by': {
+                "id": payment.paid_by.id,
+                "name": payment.paid_by.name,
+                "email": payment.paid_by.email,
+                "image": MEDIA_URL + str(payment.paid_by.image.name),
+                "location": payment.paid_by.location,
+                "cnic": payment.paid_by.cnic,
+                "phone": payment.paid_by.phone,
+                "status": check_status(payment.paid_by.is_active),
+                "pppoe": payment.paid_by.pppoe.name,
+                "profile": payment.paid_by.profile.name,
+            },
+        }, status.HTTP_201_CREATED)

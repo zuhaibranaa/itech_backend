@@ -97,12 +97,12 @@ class InventoryItem(models.Model):
 
 
 class Sale(models.Model):
-    item_id = models.ForeignKey(InventoryItem, models.CASCADE)
+    item = models.ForeignKey(InventoryItem, models.CASCADE)
     quantity = models.IntegerField(default=1)
     sale_price = models.IntegerField()
-    payment_id = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+    payment = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     description = models.TextField(max_length=1000)
-    customer_id = models.ForeignKey(User, models.CASCADE, verbose_name='Customer', related_name='C')
+    customer = models.ForeignKey(User, models.CASCADE, verbose_name='Customer', related_name='C')
 
     def __str__(self):
         return self.item_id
