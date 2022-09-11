@@ -56,7 +56,7 @@ class Invoice(models.Model):
         ('pending', 'Pending'),
         ('overdue', 'Overdue'),
     }
-    customer_id = models.ForeignKey(User, models.CASCADE, verbose_name='Customer', related_name='Customer')
+    customer = models.ForeignKey(User, models.CASCADE, verbose_name='Customer', related_name='Customer')
     generated_by = models.ForeignKey(User, models.CASCADE, verbose_name='Manager', related_name='Manager')
     billing_date = models.DateTimeField(default=None)
     due_date = models.DateTimeField(default=None)
