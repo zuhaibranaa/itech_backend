@@ -5,6 +5,65 @@ from .serializers import *
 
 
 # Create your views here.
+class SuppliersView(APIView):
+    # get all Suppliers
+    def get(self, request):
+        data = Supplier.objects.all()
+        serializer = SupplierSerializer(data=data, many=True)
+        serializer.is_valid()
+        try:
+            return Response(serializer.data, status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': 'Data Has Errors'})
+
+    # get single Supplier
+    def patch(self, request):
+        try:
+            data = Supplier.objects.get(id=request.data.get('id'))
+            return Response({
+                'id': data.id,
+                'name': data.name,
+                'email': data.email,
+                'address': data.address,
+                'mobile': data.mobile,
+            }, status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message': "No Record Found Against Provided Id"}, status.HTTP_404_NOT_FOUND)
+
+    # update a Supplier
+
+    def put(self, request):
+        data = Supplier.objects.get(id=request.data.get('id'))
+        data.name = request.data.get('name')
+        data.email = request.data.get('email')
+        data.address = request.data.get('address')
+        data.mobile = request.data.get('mobile')
+        data.save()
+        return Response({
+            'id': data.id,
+            'name': data.name,
+            'email': data.email,
+            'address': data.address,
+            'mobile': data.mobile,
+        }, status.HTTP_200_OK)
+
+    # create new Supplier
+    def post(self, request):
+        supplier = SupplierSerializer(data=request.data)
+        if supplier.is_valid(True):
+            supplier.save()
+            return Response(supplier.data, status.HTTP_201_CREATED)
+        return Response({'message': "Data Has Errors Try Again"}, status.HTTP_400_BAD_REQUEST)
+
+    # delete a Supplier
+    def delete(self, request):
+        try:
+            data = Supplier.objects.get(id=request.data.get('id'))
+            data.delete()
+            return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
+
 
 class InvoicesView(APIView):
     # get all invoices
@@ -90,47 +149,6 @@ class JournalView(APIView):
     # delete an invoice
     def delete(self, request):
         data = Journal.objects.get(id=request.data.get('id'))
-        try:
-            data.delete()
-            return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
-        except:
-            return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
-
-
-class SuppliersView(APIView):
-    # get all invoices
-    def get(self, request):
-        data = Supplier.objects.all()
-        serializer = SupplierSerializer(data=data, many=True)
-        serializer.is_valid()
-        try:
-            return Response(serializer.data, status.HTTP_200_OK)
-        except:
-            return Response({'error': 'Data Has Errors'})
-
-    # get single invoice
-    def patch(self, request):
-        data = Supplier.objects.get(id=request.data.id)
-        serializer = SupplierSerializer(data=data)
-        if serializer.is_valid(True):
-            return Response(serializer.data, status.HTTP_200_OK)
-
-    # update an invoice
-    def put(self, request):
-        data = Supplier.objects.get(id=request.data.payment)
-        serializer = SupplierSerializer(data=data)
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    # create new invoice
-    def post(self, request):
-        supplier = SupplierSerializer(data=request.data)
-        if supplier.is_valid(True):
-            supplier.save()
-            return Response(supplier.data, status.HTTP_201_CREATED)
-
-    # delete an invoice
-    def delete(self, request):
-        data = Supplier.objects.get(id=request.data.get('id'))
         try:
             data.delete()
             return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
