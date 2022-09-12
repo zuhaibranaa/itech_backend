@@ -10,7 +10,6 @@ def check_status(status):
     return "Inactive"
 
 
-# Create your views here.
 class SuppliersView(APIView):
     # get all Suppliers
     def get(self, request):
@@ -136,58 +135,106 @@ class InvoicesView(APIView):
             return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
 
 
-# Pending For Now
 class JournalView(APIView):
-    # get all invoices
+    # get all Entries
     def get(self, request):
         data = Journal.objects.all()
-        serializer = JournalSerializer(data=data, many=True)
-        serializer.is_valid()
-        response = []
-        try:
-            for i in serializer.data:
-                transactions = Transaction.objects.get(journal_entry_id=i['id'])
-                print(transactions)
-            return Response(serializer.data, status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'error': 'Data Has Errors'})
+        objects = []
+        for obj in data:
+            transactions = Transaction.objects.filter(journal_entry_id=obj.id)
+            list_of_transactions = [{
+                    'id': t.id,
+                    'type': t.tx_type,
+                    'amount': t.amount,
+                    'description': t.description,
+                    't_account': t.t_account,
+                    'account': {
+                        'id': t.account.id,
+                        'current_balance': t.account.current_balance,
+                        'user': {
+                            "id": t.account.user.id,
+                            "name": t.account.user.name,
+                            "email": t.account.user.email,
+                            "image": MEDIA_URL + str(t.account.user.image.name),
+                            "location": t.account.user.location,
+                            "cnic": t.account.user.cnic,
+                            "phone": t.account.user.phone,
+                        },
+                    },
+                } for t in transactions]
+            print(list_of_transactions)
+            objects.append(
+                {
+                    'id': obj.id,
+                    'date': obj.date,
+                    'description': obj.description,
+                    'activity_type': obj.activity_type,
+                    'transactions': list_of_transactions
+                }
+            )
+            return Response(objects, status.HTTP_200_OK)
 
-    # get single invoice
+    # get single Entry
     def patch(self, request):
-        data = Journal.objects.get(id=request.data.id)
-        serializer = JournalSerializer(data=data)
-        if serializer.is_valid(True):
-            return Response(serializer.data, status.HTTP_200_OK)
+        obj = Journal.objects.get(id=request.data.get('id'))
+        transactions = Transaction.objects.filter(journal_entry_id=obj.id)
+        list_of_transactions = [{
+            'id': t.id,
+            'type': t.tx_type,
+            'amount': t.amount,
+            'description': t.description,
+            'account': {
+                'id': t.account.id,
+                'current_balance': t.account.current_balance,
+                'user': {
+                    "id": t.account.user.id,
+                    "name": t.account.user.name,
+                    "email": t.account.user.email,
+                    "image": MEDIA_URL + str(t.account.user.image.name),
+                    "location": t.account.user.location,
+                    "cnic": t.account.user.cnic,
+                    "phone": t.account.user.phone,
+                },
+            },
+        } for t in transactions]
+        return Response({
+                    'id': obj.id,
+                    'date': obj.date,
+                    'description': obj.description,
+                    'activity_type': obj.activity_type,
+                    'transactions': list_of_transactions
+                }, status.HTTP_200_OK)
 
-    # update an invoice
-    def put(self, request):
-        data = Journal.objects.get(id=request.data.payment)
-        serializer = JournalSerializer(data=data)
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    # create new invoice
+    # create new Entry
     def post(self, request):
-        journal = JournalSerializer(data=request.data.get('description'))
-        if journal.is_valid():
-            print(' Journal Saved')
-            journal.save()
-        j_rec = Journal.objects.get(description=request.data.get('description'))
-        transactions_data = request.data.get('transactions')
-        for obj in transactions_data:
-            obj['journal_entry_id'] = j_rec.id
-        print(transactions_data)
-        # transactions = TransactionSerializer(data=request.data.get('transactions'), many=True)
-        # transactions.is_valid()
-        # print(transactions.data)
-        #     return Response(journal.data, status.HTTP_201_CREATED)
+        if len(request.data.get('transactions')) < 2:
+            return Response({'message': 'There Must Be Two Transactions'},status.HTTP_400_BAD_REQUEST)
+        data = Journal.objects.create(
+            description=request.data.get('description'),
+            activity_type=request.data.get('type')
+        )
 
-    # delete an invoice
+        for t in request.data.get('transactions'):
+            transaction = Transaction.objects.create(
+                id=t.id,
+                tx_type=t.tx_type,
+                amount=t.amount,
+                description=t.description,
+                account_id=t.account_id,
+                journal_entry_id=data.id,
+                t_account=t.t_account
+            )
+            transaction.save()
+        data.save()
+        return Response({'message': 'Transactions And Journal Entry Saved'},status.HTTP_201_CREATED)
+
+    # delete an Entry
     def delete(self, request):
         data = Journal.objects.get(id=request.data.get('id'))
         try:
             data.delete()
             return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
-        except:
+        except Exception as e:
             return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
 
 
@@ -340,16 +387,17 @@ class PaymentsView(APIView):
                 'updated_at': data.invoice.updated_at,
             },
             'paid_by': {
-                "id": data.paid_by.id,
-                "name": data.paid_by.name,
-                "email": data.paid_by.email,
-                "image": MEDIA_URL + str(data.paid_by.image.name),
-                "location": data.paid_by.location,
-                "cnic": data.paid_by.cnic,
-                "phone": data.paid_by.phone,
-                "status": check_status(data.paid_by.is_active),
-                "pppoe": data.paid_by.pppoe.name,
-                "profile": data.paid_by.profile.name,
+                'id': data.paid_by.id,
+                'current_balance': data.paid_by.current_balance,
+                'user': {
+                    "id": data.paid_by.user.id,
+                    "name": data.paid_by.user.name,
+                    "email": data.paid_by.user.email,
+                    "image": MEDIA_URL + str(data.paid_by.user.image.name),
+                    "location": data.paid_by.user.location,
+                    "cnic": data.paid_by.user.cnic,
+                    "phone": data.paid_by.user.phone,
+                },
             },
         }, status.HTTP_200_OK)
 
@@ -364,6 +412,8 @@ class PaymentsView(APIView):
         )
         payment.invoice.invoice_status = 'paid'
         payment.invoice.save()
+        payment.paid_by.current_balance -= payment.amount
+        payment.paid_by.save()
         payment.save()
         return Response({
             "id": payment.id,

@@ -86,7 +86,7 @@ class Invoice(models.Model):
 
 
 class Payment(models.Model):
-    paid_by = models.ForeignKey(User, models.CASCADE)
+    paid_by = models.ForeignKey(BillingAccount, models.CASCADE)
     invoice = models.OneToOneField(Invoice, models.CASCADE)
     amount = models.IntegerField()
     method = models.CharField(max_length=255)
