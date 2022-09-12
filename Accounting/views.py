@@ -75,7 +75,7 @@ class InvoicesView(APIView):
     # get all invoices
     def get(self, request):
         data = Invoice.objects.all()
-        serializer = InvoiceSerializer(data=data, many=True)
+        serializer = InvoiceSerializer(data=data, many=True, source="i_status")
         serializer.is_valid()
         try:
             return Response(serializer.data, status.HTTP_200_OK)
@@ -116,7 +116,7 @@ class InvoicesView(APIView):
                 "phone": data.generated_by.phone,
             },
             'description': data.description,
-            'status': data.invoice_status,
+            'status': data.i_status(),
         }, status.HTTP_200_OK)
 
     # create new invoice
@@ -272,34 +272,43 @@ class SalesView(APIView):
         except Exception as e:
             return Response({'error': 'Data Has Errors'})
 
-    # get single invoice
-    def patch(self, request):
-        data = Sale.objects.get(id=request.data.id)
-        serializer = SalesSerializer(data=data)
-        if serializer.is_valid(True):
-            return Response(serializer.data, status.HTTP_200_OK)
-
-    # update an invoice
-    def put(self, request):
-        data = Sale.objects.get(id=request.data.payment)
-        serializer = SalesSerializer(data=data)
-        return Response(serializer.data, status.HTTP_200_OK)
-
     # create new invoice
     def post(self, request):
-        sales = SalesSerializer(data=request.data)
-        if sales.is_valid(True):
-            sales.save()
-            return Response(sales.data, status.HTTP_201_CREATED)
+        sales = Sale.objects.create(
+            quantity=request.data.get('quantity'),
+            sale_price=request.data.get('price'),
+            description=request.data.get('description'),
+            customer_id=request.data.get('customer'),
+            item_id=request.data.get('item_id'),
+            payment_id=request.data.get('payment'),
+        )
+        sales.save()
+        sales.item.sku -= request.data.get('quantity')
+        sales.item.save()
 
-    # delete an invoice
-    def delete(self, request):
-        data = Sale.objects.get(id=request.data.get('id'))
-        try:
-            data.delete()
-            return Response({'message': 'Object Deleted Successfully'}, status.HTTP_204_NO_CONTENT)
-        except:
-            return Response({'message': 'Error Deleting Object'}, status.HTTP_204_NO_CONTENT)
+        return Response({
+            "quantity": sales.quantity,
+            "sale_price": sales.sale_price,
+            "description": request.data.get('description'),
+            "customer": {
+                "id": sales.customer.id,
+                "name": sales.customer.name,
+                "email": sales.customer.email,
+                "image": MEDIA_URL + str(sales.customer.image.name),
+                "location": sales.customer.location,
+                "cnic": sales.customer.cnic,
+                "phone": sales.customer.phone,
+            },
+            "item": {
+                'id': sales.item.id,
+                'name': sales.item.item_name,
+                'price': sales.item.purchase_price,
+                'quantity': sales.item.sku,
+                'description': sales.item.description,
+                'buying_date': sales.item.buying_date,
+            },
+                                                                        "payment_id": request.data.get('payment'),
+        }, status.HTTP_201_CREATED)
 
 
 class PaymentsView(APIView):

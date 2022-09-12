@@ -1,6 +1,9 @@
+import datetime
+
 from django.db import models
 from Users.models import *
 from django.core.validators import RegexValidator
+import time
 
 TRANSACTION_CHOICES = (
     ('dr', 'DEBIT'),
@@ -45,7 +48,7 @@ class Supplier(models.Model):
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,20}$',
                                  message="Phone number must be entered in the format: '+999999999'")
     name = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255,unique=True)
+    email = models.EmailField(max_length=255, unique=True)
     address = models.CharField(max_length=255)
     mobile = models.IntegerField(validators=[phone_regex])
 
@@ -67,6 +70,16 @@ class Invoice(models.Model):
     invoice_status = models.CharField(max_length=7, choices=status)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def i_status(self):
+        payment = Payment.objects.get(invoice=self)
+        if payment:
+            self.status = "paid"
+        elif datetime.datetime.now() > self.due_date:
+            self.status = 'Overdue'
+        else:
+            self.status = 'unpaid'
+        return self.status
 
     def __str__(self) -> str:
         return super().__str__()
