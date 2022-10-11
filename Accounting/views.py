@@ -38,11 +38,12 @@ class SuppliersView(APIView):
     # update a Supplier
 
     def put(self, request):
-        data = Supplier.objects.get(id=request.data.get('id'))
-        data.name = request.data.get('name')
-        data.email = request.data.get('email')
-        data.address = request.data.get('address')
-        data.mobile = request.data.get('mobile')
+        print(request.data['data']['id'])
+        data = Supplier.objects.get(id=request.data['data']['id'])
+        data.name = request.data['data']['name']
+        data.email = request.data['data']['email']
+        data.address = request.data['data']['address']
+        data.mobile = request.data['data']['mobile']
         data.save()
         return Response({
             'id': data.id,
@@ -62,6 +63,7 @@ class SuppliersView(APIView):
 
     # delete a Supplier
     def delete(self, request):
+        print(request.data.get('id'))
         try:
             data = Supplier.objects.get(id=request.data.get('id'))
             data.delete()
@@ -76,6 +78,30 @@ class InvoicesView(APIView):
         data = Invoice.objects.all()
         serializer = InvoiceSerializer(data=data, many=True, source="i_status")
         serializer.is_valid()
+        for i in serializer.data:
+            customer = User.objects.get(id=i.get('customer'))
+            generated_by = User.objects.get(id=i.get('generated_by'))
+            i.update({'customer': {
+                "id": customer.id,
+                "name": customer.name,
+                "email": customer.email,
+                "image": MEDIA_URL + str(customer.image.name),
+                "location": customer.location,
+                "cnic": customer.cnic,
+                "phone": customer.phone,
+                "status": check_status(customer.is_active),
+                "pppoe": customer.pppoe.name,
+                "profile": customer.profile.name,
+            }})
+            i.update({'generated_by': {
+                "id": generated_by.id,
+                "name": generated_by.name,
+                "email": generated_by.email,
+                "image": MEDIA_URL + str(generated_by.image.name),
+                "location": generated_by.location,
+                "cnic": generated_by.cnic,
+                "phone": generated_by.phone,
+            }})
         try:
             return Response(serializer.data, status.HTTP_200_OK)
         except Exception as e:
@@ -361,10 +387,18 @@ class SalesView(APIView):
 class PaymentsView(APIView):
     #  get all payments
     def get(self, req):
-        data = Payment.objects.all()
-        serializer = PaymentSerializer(data=data, many=True)
-        serializer.is_valid()
-        return Response(serializer.data, status.HTTP_200_OK)
+        payments = Payment.objects.all()
+        x = [{
+            'id': p.id,
+            'amount': p.amount,
+            'method': p.method,
+            'description': p.description,
+            'created_at': p.created_at,
+            'invoice': p.invoice.id,
+            'paid_by': p.paid_by.user.email,
+            } for p in payments]
+        print(x)
+        return Response(x, status.HTTP_200_OK)
 
     # get single payment
     def patch(self, request):

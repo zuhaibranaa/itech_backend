@@ -7,6 +7,14 @@ from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, Permi
 
 
 # Create your models here.
+
+class Area(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class UserManager(BaseUserManager):
     def create_user(self, name, location, phone, email, is_active, image=None, password=None, cnic=None):
         """
@@ -66,6 +74,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     cnic = models.CharField(max_length=20, null=True)
     phone = models.CharField(max_length=500, validators=[phone_regex], unique=True)
     pppoe = models.ForeignKey(PPPOE, models.CASCADE, null=True)
+    area = models.ForeignKey(Area, models.CASCADE, null=True)
     profile = models.ForeignKey(Profile, models.CASCADE, null=True, default=None)
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
     is_active = models.BooleanField(default=False)

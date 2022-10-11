@@ -1,9 +1,7 @@
 import datetime
 
-from django.db import models
 from Users.models import *
 from django.core.validators import RegexValidator
-import time
 
 TRANSACTION_CHOICES = (
     ('dr', 'DEBIT'),
@@ -76,14 +74,13 @@ class Invoice(models.Model):
         if payment:
             self.status = "paid"
         elif datetime.datetime.now() > self.due_date:
-            self.status = 'Overdue'
+            self.status = 'overdue'
         else:
             self.status = 'unpaid'
         return self.status
 
     def __str__(self) -> str:
         return super().__str__()
-
 
 class Payment(models.Model):
     paid_by = models.ForeignKey(BillingAccount, models.CASCADE)
@@ -92,7 +89,6 @@ class Payment(models.Model):
     method = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return super().__str__()

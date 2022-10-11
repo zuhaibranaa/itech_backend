@@ -19,6 +19,8 @@ cookiecutter = "*"
 autopep8 = "*"
 django-ledger = {git = "https://github.com/arrobalytics/django-ledger.git"}
 pyrad = "*"
+pandas = "*"
+celery = "*"
 
 [dev-packages]
 
