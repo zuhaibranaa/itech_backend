@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'Accounting',
     'RouterOS',
     'Users',
+    'django_seed'
     # 'django_ledger'
 ]
 

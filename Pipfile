@@ -21,6 +21,7 @@ django-ledger = {git = "https://github.com/arrobalytics/django-ledger.git"}
 pyrad = "*"
 pandas = "*"
 celery = "*"
+psycopg2 = "*"
 
 [dev-packages]
 

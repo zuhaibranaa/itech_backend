@@ -15,8 +15,16 @@ class Area(models.Model):
         return self.name
 
 
+class SubArea(models.Model):
+    parent = models.ForeignKey(Area, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class UserManager(BaseUserManager):
-    def create_user(self, name, location, phone, email, is_active, image=None, password=None, cnic=None):
+    def create_user(self, name, phone, email, is_active, image=None, password=None, cnic=None):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -28,7 +36,6 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             name=name,
             image=image,
-            location=location,
             cnic=cnic,
             phone=phone,
             is_active=is_active
@@ -38,7 +45,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, name, location, phone, email, cnic, password=None):
+    def create_superuser(self, name, phone, email, cnic, password=None):
         """
         Creates and saves a superuser with the given email, date of
         birth and password.
@@ -46,7 +53,6 @@ class UserManager(BaseUserManager):
         user = self.create_user(
             email=email,
             name=name,
-            location=location,
             cnic=cnic,
             phone=phone,
             password=password,
@@ -70,11 +76,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     name = models.CharField(max_length=200)
     image = models.ImageField(upload_to='my_picture', blank=True, default=None)
-    location = models.CharField(max_length=255)
     cnic = models.CharField(max_length=20, null=True)
     phone = models.CharField(max_length=500, validators=[phone_regex], unique=True)
     pppoe = models.ForeignKey(PPPOE, models.CASCADE, null=True)
-    area = models.ForeignKey(Area, models.CASCADE, null=True)
+    area = models.ForeignKey(SubArea, models.CASCADE, null=True)
     profile = models.ForeignKey(Profile, models.CASCADE, null=True, default=None)
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
     is_active = models.BooleanField(default=False)
@@ -86,7 +91,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'phone', 'location', 'cnic']
+    REQUIRED_FIELDS = ['name', 'phone', 'cnic']
 
     def __str__(self):
         return self.email
@@ -112,7 +117,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.is_admin
 
 
-class Messages(models.Model):
+class Message(models.Model):
     title = models.CharField(max_length=100)
     text = models.TextField()
     from_user = models.ForeignKey(User, models.CASCADE, verbose_name='Sender', related_name='Sender')
@@ -122,7 +127,7 @@ class Messages(models.Model):
         return self.title
 
 
-class Complains(models.Model):
+class Complain(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     user = models.ForeignKey(User, models.CASCADE, verbose_name='User', related_name='Complainer')

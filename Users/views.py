@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -39,7 +40,8 @@ class UserRegister(APIView):
                 invoice_status='pending'
             )
             invoice.save()
-            return Response({'user': serializer.data, 'token': token, 'balance': account.current_balance}, status=status.HTTP_201_CREATED)
+            return Response({'user': serializer.data, 'token': token, 'balance': account.current_balance},
+                            status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -61,7 +63,8 @@ class UserLogin(APIView):
                 token = get_tokens_for_user(user)
                 serializer = UserProfileSerializer(user)
                 user_account = BillingAccount.objects.get(user=serializer.data.get('id'))
-                return Response({'user': serializer.data, 'balance': user_account.current_balance, 'token': token}, status.HTTP_202_ACCEPTED)
+                return Response({'user': serializer.data, 'balance': user_account.current_balance, 'token': token},
+                                status.HTTP_202_ACCEPTED)
             else:
                 return Response({'error': 'No User Found Against Your Email Or Password Check Your Credentials'},
                                 status.HTTP_404_NOT_FOUND)
@@ -73,3 +76,44 @@ class GetCustomers(APIView):
         serializer = UserProfileSerializer(data=objects, many=True)
         serializer.is_valid()
         return Response(serializer.data, status.HTTP_200_OK)
+
+
+class AreaViews(APIView):
+    def get(self, request):
+        areas = Area.objects.all()
+        serializer = AreaSerializer(data=areas, many=True)
+        serializer.is_valid()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        area = Area.objects.create(
+            name=request.data.get('name')
+        )
+        area.save()
+        return Response({'id': area.id, 'name': area.name}, status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        area = Area.objects.get(id=request.data.get('id'))
+        area.delete()
+        return Response({'id': area.id, 'name': area.name}, status.HTTP_204_NO_CONTENT)
+
+
+class SubAreaViews(APIView):
+    def get(self, request):
+        areas = SubArea.objects.all()
+        serializer = SubAreaSerializer(data=areas, many=True)
+        serializer.is_valid()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        area = SubArea.objects.create(
+            name=request.data.get('name'),
+            parent_id=request.data.get('parent')
+        )
+        area.save()
+        return Response({'id': area.id, 'name': area.name, 'parent': area.parent}, status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        area = SubArea.objects.get(id=request.data.get('id'))
+        area.delete()
+        return Response({'id': area.id, 'name': area.name}, status.HTTP_204_NO_CONTENT)

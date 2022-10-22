@@ -4,5 +4,7 @@ from Users.models import *
 
 # Register your models here.
 admin.site.register(User)
-admin.site.register(Messages)
-admin.site.register(Complains)
+admin.site.register(Message)
+admin.site.register(Complain)
+admin.site.register(Area)
+admin.site.register(SubArea)

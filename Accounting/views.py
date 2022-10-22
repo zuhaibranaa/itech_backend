@@ -1,3 +1,6 @@
+import datetime
+
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView, status
 from .serializers import *
@@ -11,6 +14,8 @@ def check_status(status):
 
 
 class SuppliersView(APIView):
+    # permission_classes = [IsAuthenticated]
+
     # get all Suppliers
     def get(self, request):
         data = Supplier.objects.all()
@@ -86,7 +91,6 @@ class InvoicesView(APIView):
                 "name": customer.name,
                 "email": customer.email,
                 "image": MEDIA_URL + str(customer.image.name),
-                "location": customer.location,
                 "cnic": customer.cnic,
                 "phone": customer.phone,
                 "status": check_status(customer.is_active),
@@ -98,7 +102,6 @@ class InvoicesView(APIView):
                 "name": generated_by.name,
                 "email": generated_by.email,
                 "image": MEDIA_URL + str(generated_by.image.name),
-                "location": generated_by.location,
                 "cnic": generated_by.cnic,
                 "phone": generated_by.phone,
             }})
@@ -124,7 +127,6 @@ class InvoicesView(APIView):
                 "name": data.customer.name,
                 "email": data.customer.email,
                 "image": MEDIA_URL + str(data.customer.image.name),
-                "location": data.customer.location,
                 "cnic": data.customer.cnic,
                 "phone": data.customer.phone,
                 "status": check_status(data.customer.is_active),
@@ -136,7 +138,6 @@ class InvoicesView(APIView):
                 "name": data.generated_by.name,
                 "email": data.generated_by.email,
                 "image": MEDIA_URL + str(data.generated_by.image.name),
-                "location": data.generated_by.location,
                 "cnic": data.generated_by.cnic,
                 "phone": data.generated_by.phone,
             },
@@ -169,25 +170,24 @@ class JournalView(APIView):
         for obj in data:
             transactions = Transaction.objects.filter(journal_entry_id=obj.id)
             list_of_transactions = [{
-                    'id': t.id,
-                    'type': t.tx_type,
-                    'amount': t.amount,
-                    'description': t.description,
-                    't_account': t.t_account,
-                    'account': {
-                        'id': t.account.id,
-                        'current_balance': t.account.current_balance,
-                        'user': {
-                            "id": t.account.user.id,
-                            "name": t.account.user.name,
-                            "email": t.account.user.email,
-                            "image": MEDIA_URL + str(t.account.user.image.name),
-                            "location": t.account.user.location,
-                            "cnic": t.account.user.cnic,
-                            "phone": t.account.user.phone,
-                        },
+                'id': t.id,
+                'type': t.tx_type,
+                'amount': t.amount,
+                'description': t.description,
+                't_account': t.t_account,
+                'account': {
+                    'id': t.account.id,
+                    'current_balance': t.account.current_balance,
+                    'user': {
+                        "id": t.account.user.id,
+                        "name": t.account.user.name,
+                        "email": t.account.user.email,
+                        "image": MEDIA_URL + str(t.account.user.image.name),
+                        "cnic": t.account.user.cnic,
+                        "phone": t.account.user.phone,
                     },
-                } for t in transactions]
+                },
+            } for t in transactions]
             print(list_of_transactions)
             objects.append(
                 {
@@ -217,24 +217,23 @@ class JournalView(APIView):
                     "name": t.account.user.name,
                     "email": t.account.user.email,
                     "image": MEDIA_URL + str(t.account.user.image.name),
-                    "location": t.account.user.location,
                     "cnic": t.account.user.cnic,
                     "phone": t.account.user.phone,
                 },
             },
         } for t in transactions]
         return Response({
-                    'id': obj.id,
-                    'date': obj.date,
-                    'description': obj.description,
-                    'activity_type': obj.activity_type,
-                    'transactions': list_of_transactions
-                }, status.HTTP_200_OK)
+            'id': obj.id,
+            'date': obj.date,
+            'description': obj.description,
+            'activity_type': obj.activity_type,
+            'transactions': list_of_transactions
+        }, status.HTTP_200_OK)
 
     # create new Entry
     def post(self, request):
         if len(request.data.get('transactions')) < 2:
-            return Response({'message': 'There Must Be Two Transactions'},status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'There Must Be Two Transactions'}, status.HTTP_400_BAD_REQUEST)
         data = Journal.objects.create(
             description=request.data.get('description'),
             activity_type=request.data.get('type')
@@ -252,7 +251,7 @@ class JournalView(APIView):
             )
             transaction.save()
         data.save()
-        return Response({'message': 'Transactions And Journal Entry Saved'},status.HTTP_201_CREATED)
+        return Response({'message': 'Transactions And Journal Entry Saved'}, status.HTTP_201_CREATED)
 
     # delete an Entry
     def delete(self, request):
@@ -368,7 +367,6 @@ class SalesView(APIView):
                 "name": sales.customer.name,
                 "email": sales.customer.email,
                 "image": MEDIA_URL + str(sales.customer.image.name),
-                "location": sales.customer.location,
                 "cnic": sales.customer.cnic,
                 "phone": sales.customer.phone,
             },
@@ -380,7 +378,7 @@ class SalesView(APIView):
                 'description': sales.item.description,
                 'buying_date': sales.item.buying_date,
             },
-                                                                        "payment_id": request.data.get('payment'),
+            "payment_id": request.data.get('payment'),
         }, status.HTTP_201_CREATED)
 
 
@@ -396,7 +394,7 @@ class PaymentsView(APIView):
             'created_at': p.created_at,
             'invoice': p.invoice.id,
             'paid_by': p.paid_by.user.email,
-            } for p in payments]
+        } for p in payments]
         print(x)
         return Response(x, status.HTTP_200_OK)
 
@@ -428,7 +426,6 @@ class PaymentsView(APIView):
                     "name": data.paid_by.user.name,
                     "email": data.paid_by.user.email,
                     "image": MEDIA_URL + str(data.paid_by.user.image.name),
-                    "location": data.paid_by.user.location,
                     "cnic": data.paid_by.user.cnic,
                     "phone": data.paid_by.user.phone,
                 },
@@ -469,7 +466,6 @@ class PaymentsView(APIView):
                 "name": payment.paid_by.name,
                 "email": payment.paid_by.email,
                 "image": MEDIA_URL + str(payment.paid_by.image.name),
-                "location": payment.paid_by.location,
                 "cnic": payment.paid_by.cnic,
                 "phone": payment.paid_by.phone,
                 "status": check_status(payment.paid_by.is_active),
@@ -477,3 +473,12 @@ class PaymentsView(APIView):
                 "profile": payment.paid_by.profile.name,
             },
         }, status.HTTP_201_CREATED)
+
+
+class PaymentReport(APIView):
+    def get(self, request):
+        data = Invoice.objects.all()
+        serializer = InvoiceSerializer(data=data, many=True)
+        serializer.is_valid()
+        # data.get(billing_date=)
+        return Response(serializer.data, status.HTTP_200_OK)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Users.models import Complains, User, Messages
+from Users.models import Complain, User, Message, Area ,SubArea
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -39,11 +39,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class MessagesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Messages
+        model = Message
         fields = '__all__'
 
 
 class ComplainsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Complains
+        model = Complain
         fields = '__all__'
+
+
+class AreaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Area
+        fields = '__all__'
+
+
+class SubAreaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubArea
+        fields = '__all__'
+

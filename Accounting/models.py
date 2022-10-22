@@ -82,6 +82,7 @@ class Invoice(models.Model):
     def __str__(self) -> str:
         return super().__str__()
 
+
 class Payment(models.Model):
     paid_by = models.ForeignKey(BillingAccount, models.CASCADE)
     invoice = models.OneToOneField(Invoice, models.CASCADE)
