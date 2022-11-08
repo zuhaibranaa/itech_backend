@@ -115,4 +115,4 @@ class Sale(models.Model):
     customer = models.ForeignKey(User, models.CASCADE, verbose_name='Customer', related_name='C')
 
     def __str__(self):
-        return self.item_id
+        return str(self.item_id)
